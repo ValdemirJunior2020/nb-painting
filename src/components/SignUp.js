@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebase/firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
   const [form, setForm] = useState({
@@ -11,6 +12,7 @@ const SignUp = () => {
     password: ''
   });
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,6 +35,7 @@ const SignUp = () => {
       });
 
       setMessage('Account created successfully!');
+      navigate('/estimate');
     } catch (error) {
       setMessage(`Error: ${error.message}`);
     }
@@ -40,7 +43,7 @@ const SignUp = () => {
 
   return (
     <div style={styles.container}>
-      <h2>Create Your Free Estimate Account</h2>
+      <h2>Create Your Account</h2>
       <form onSubmit={handleSignUp} style={styles.form}>
         <input type="text" name="name" placeholder="Full Name" onChange={handleChange} required />
         <input type="tel" name="phone" placeholder="Phone Number" onChange={handleChange} required />
@@ -57,7 +60,7 @@ const styles = {
   container: {
     padding: 30,
     backgroundColor: '#111',
-    color: '#ffd700',
+    color: '#b59410',
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db, storage, auth } from '../firebase/firebaseConfig';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useNavigate } from 'react-router-dom';
 
 const EstimateForm = () => {
   const [form, setForm] = useState({
@@ -12,6 +13,20 @@ const EstimateForm = () => {
 
   const [image, setImage] = useState(null);
   const [message, setMessage] = useState('');
+
+  const navigate = useNavigate();
+
+  // Redirect if user is not logged in
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (!user) {
+        alert("Please sign up or log in to submit an estimate.");
+        navigate('/signup');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

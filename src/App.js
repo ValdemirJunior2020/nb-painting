@@ -1,14 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import SignUp from './components/SignUp';
-import EstimateForm from './components/EstimateForm';
-import AdminDashboard from './components/AdminDashboard';
-import Login from './components/Login';
-import MyEstimates from './components/MyEstimates';
-import Gallery from './components/Gallery';
-import Reviews from './components/Reviews';
+
 import Navbar from './components/Navbar';
 import LandingPage from './components/LandingPage';
+import SignUp from './components/SignUp';
+import Login from './components/Login';
+import EstimateForm from './components/EstimateForm';
+import MyEstimates from './components/MyEstimates';
+import AdminDashboard from './components/AdminDashboard';
+import Gallery from './components/Gallery';
+import Reviews from './components/Reviews';
 
 function App() {
   return (

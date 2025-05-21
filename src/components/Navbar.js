@@ -10,7 +10,8 @@ const Navbar = () => {
 
   return (
     <nav style={styles.nav}>
-      <Link to="/" style={styles.link}>Sign Up</Link>
+      <Link to="/" style={styles.link}>Home</Link>
+      <Link to="/signup" style={styles.link}>Sign Up</Link>
       <Link to="/login" style={styles.link}>Login</Link>
       <Link to="/estimate" style={styles.link}>Estimate</Link>
       <Link to="/my-estimates" style={styles.link}>My Estimates</Link>
@@ -32,12 +33,12 @@ const styles = {
     flexWrap: 'wrap'
   },
   link: {
-    color: '#ffd700',
+    color: '#b59410',
     textDecoration: 'none',
     fontWeight: 'bold'
   },
   logout: {
-    background: '#ffd700',
+    background: '#b59410',
     border: 'none',
     padding: '5px 10px',
     fontWeight: 'bold',

@@ -1,38 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../firebase/firebaseConfig';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const MyEstimates = () => {
   const [estimates, setEstimates] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchUserEstimates = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const q = query(
-        collection(db, 'estimates'),
-        where('userId', '==', user.uid),
-        orderBy('timestamp', 'desc')
-      );
-
-      const querySnapshot = await getDocs(q);
-      const results = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setEstimates(results);
-    } catch (error) {
-      console.error("Error fetching user estimates:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUserEstimates();
-  }, []);
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert("Please log in to view your estimates.");
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const q = query(
+          collection(db, 'estimates'),
+          where('userId', '==', user.uid),
+          orderBy('timestamp', 'desc')
+        );
+
+        const querySnapshot = await getDocs(q);
+        const results = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setEstimates(results);
+      } catch (error) {
+        console.error("Error fetching estimates:", error);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   return (
     <div style={styles.container}>
