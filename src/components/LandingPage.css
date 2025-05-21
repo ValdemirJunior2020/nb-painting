@@ -5,21 +5,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
   text-align: center;
   padding: 20px;
-  box-sizing: border-box;
 }
 
 .overlay {
-  width: 100%;
-  max-width: 700px;
+  text-align: center;
 }
 
 .logo {
-  width: 80px;
+  width: 90px;
   margin-bottom: 20px;
-  filter: drop-shadow(2px 2px 20px #b59410);
+  filter: drop-shadow(2px 2px 6px #b59410);
 }
 
 .title {
@@ -31,8 +28,8 @@
 
 .subtitle {
   font-size: 1.2rem;
+  margin: 20px 0;
   color: #ccc;
-  margin: 15px 0;
 }
 
 .contact-btn {
@@ -47,25 +44,5 @@
 }
 
 .contact-btn:hover {
-  background-color: #b59410;
-}
-
-/* RESPONSIVE MEDIA QUERIES */
-@media (max-width: 600px) {
-  .title {
-    font-size: 1.8rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  .contact-btn {
-    padding: 10px 20px;
-    font-size: 0.9rem;
-  }
-
-  .logo {
-    width: 60px;
-  }
+  background-color: #997c0d;
 }
