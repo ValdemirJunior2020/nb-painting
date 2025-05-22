@@ -11,27 +11,20 @@ const MyEstimates = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
-        alert("Please log in to view your estimates.");
-        navigate('/login');
-        return;
-      }
-
-      try {
+        alert("Please sign up or log in to view your estimates.");
+        navigate('/signup');
+      } else {
         const q = query(
           collection(db, 'estimates'),
           where('userId', '==', user.uid),
           orderBy('timestamp', 'desc')
         );
-
         const querySnapshot = await getDocs(q);
         const results = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
         setEstimates(results);
-      } catch (error) {
-        console.error("Error fetching estimates:", error);
-      } finally {
         setLoading(false);
       }
     });
@@ -43,13 +36,17 @@ const MyEstimates = () => {
     <div style={styles.container}>
       <h2>My Painting Estimates</h2>
       {loading ? (
-        <p>Loading your requests...</p>
-      ) : estimates.length === 0 ? (
-        <p>You haven’t submitted any estimates yet.</p>
+        <p>Loading...</p>
       ) : (
         estimates.map((est) => (
           <div key={est.id} style={styles.card}>
+            <p><strong>Name:</strong> {est.name}</p>
+            <p><strong>Phone:</strong> {est.phone}</p>
+            <p><strong>Address:</strong> {est.address}</p>
+            <p><strong>City:</strong> {est.city}</p>
+            <p><strong>State:</strong> {est.state}</p>
             <p><strong>Square Feet:</strong> {est.squareFeet}</p>
+            <p><strong>Height:</strong> {est.height} ft</p>
             <p><strong>Color:</strong> <span style={{ color: est.colorHex }}>{est.colorHex}</span></p>
             <p><strong>Price:</strong> ${est.price}</p>
             {est.imageUrl && (
@@ -68,11 +65,11 @@ const styles = {
   container: {
     padding: 30,
     backgroundColor: '#111',
-    color: '#b59410',
+    color: '#ffd700',
     minHeight: '100vh'
   },
   card: {
-    border: '1px solid #b59410',
+    border: '1px solid #ffd700',
     borderRadius: 8,
     padding: 20,
     marginBottom: 20

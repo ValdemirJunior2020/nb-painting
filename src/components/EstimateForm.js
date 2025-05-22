@@ -6,11 +6,13 @@ import { useNavigate } from 'react-router-dom';
 
 const EstimateForm = () => {
   const [form, setForm] = useState({
-    squareFeet: '',
-    colorHex: '#b59410',
-    notes: '',
+    name: '',
     address: '',
-    phone: ''
+    phone: '',
+    squareFeet: '',
+    height: '',
+    colorHex: '#b59410',
+    notes: ''
   });
 
   const [image, setImage] = useState(null);
@@ -53,11 +55,13 @@ const EstimateForm = () => {
 
       await setDoc(doc(db, 'estimates', estimateId), {
         userId: uid,
-        squareFeet: form.squareFeet,
-        colorHex: form.colorHex,
-        notes: form.notes,
+        name: form.name,
         address: form.address,
         phone: form.phone,
+        squareFeet: form.squareFeet,
+        height: form.height,
+        colorHex: form.colorHex,
+        notes: form.notes,
         price: totalPrice,
         imageUrl,
         timestamp: serverTimestamp()
@@ -65,11 +69,13 @@ const EstimateForm = () => {
 
       setMessage("Your request was submitted successfully. We will contact you as soon as possible!");
       setForm({
-        squareFeet: '',
-        colorHex: '#b59410',
-        notes: '',
+        name: '',
         address: '',
-        phone: ''
+        phone: '',
+        squareFeet: '',
+        height: '',
+        colorHex: '#b59410',
+        notes: ''
       });
       setImage(null);
     } catch (error) {
@@ -102,8 +108,16 @@ const EstimateForm = () => {
 
   return (
     <div style={styles.container}>
-      <h2>Submit a Painting Estimate</h2>
+      <h2>Submit a Quote Request</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
+        <input
+          type="text"
+          name="name"
+          placeholder="Your Name"
+          value={form.name}
+          onChange={handleChange}
+          required
+        />
         <input
           type="text"
           name="address"
@@ -125,6 +139,14 @@ const EstimateForm = () => {
           name="squareFeet"
           placeholder="Square Feet"
           value={form.squareFeet}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="number"
+          name="height"
+          placeholder="Approximate Height (in feet)"
+          value={form.height}
           onChange={handleChange}
           required
         />
