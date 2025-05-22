@@ -1,26 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Lightbox from 'react-image-lightbox';
+import 'react-image-lightbox/style.css';
 
-const Gallery = () => {
 const images = [
   { id: 1, url: '/houses/house-1.jpg', title: 'Luxury Exterior' },
   { id: 2, url: '/houses/house-2.jpg', title: 'Beautiful Finish' },
   { id: 3, url: '/houses/house-3.jpg', title: 'Modern House Paint' },
-  { id: 4, url: '/houses/house-4.jpg', title: 'Homeless Community' },
-  { id: 5, url:  '/houses/house-5.jpg', title: 'Buildings'}
+  { id: 4, url: '/houses/house-4.jpg', title: 'Homeless Community' }
 ];
 
+const Gallery = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
+
+  const handleImageClick = (index) => {
+    setPhotoIndex(index);
+    setIsOpen(true);
+  };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.heading}>Our Painting Projects</h2>
       <div style={styles.grid}>
-        {images.map((img) => (
-          <div key={img.id} style={styles.card}>
+        {images.map((img, index) => (
+          <div key={img.id} style={styles.card} onClick={() => handleImageClick(index)}>
             <img src={img.url} alt={img.title} style={styles.image} />
-            <p style={styles.title}>{img.title}</p>
+            <p style={styles.caption}>{img.title}</p>
           </div>
         ))}
       </div>
+
+      {isOpen && (
+        <Lightbox
+          mainSrc={images[photoIndex].url}
+          nextSrc={images[(photoIndex + 1) % images.length].url}
+          prevSrc={images[(photoIndex + images.length - 1) % images.length].url}
+          onCloseRequest={() => setIsOpen(false)}
+          onMovePrevRequest={() =>
+            setPhotoIndex((photoIndex + images.length - 1) % images.length)
+          }
+          onMoveNextRequest={() =>
+            setPhotoIndex((photoIndex + 1) % images.length)
+          }
+          imageCaption={images[photoIndex].title}
+        />
+      )}
     </div>
   );
 };
@@ -30,13 +54,11 @@ const styles = {
     padding: 30,
     backgroundColor: '#111',
     color: '#b59410',
-    minHeight: '100vh',
-    textAlign: 'center'
+    minHeight: '100vh'
   },
   heading: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    marginBottom: 30
+    textAlign: 'center',
+    marginBottom: 20
   },
   grid: {
     display: 'flex',
@@ -46,21 +68,21 @@ const styles = {
   },
   card: {
     border: '1px solid #b59410',
-    borderRadius: 12,
-    padding: 15,
-    width: 270,
-    boxShadow: '0 4px 12px rgba(255, 215, 0, 0.15)',
-    backgroundColor: '#1c1c1c'
+    borderRadius: 8,
+    padding: 10,
+    width: 250,
+    textAlign: 'center',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+    transition: 'transform 0.3s ease',
+    cursor: 'pointer'
   },
   image: {
     width: '100%',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    height: 200,
+    borderRadius: 10,
     marginBottom: 10,
-    border: '2px solid #b59410'
+    transition: 'transform 0.3s ease'
   },
-  title: {
+  caption: {
     fontWeight: 'bold'
   }
 };
