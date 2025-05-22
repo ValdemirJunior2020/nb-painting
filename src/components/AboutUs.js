@@ -1,24 +1,36 @@
 import React from 'react';
 
-const AboutUs = () => {
+const About = () => {
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>About Us</h2>
-        <p style={styles.text}>
-          With over <strong>15 years</strong> of experience in painting homes and commercial properties, our team proudly delivers high-quality service and exceptional results.
-        </p>
-        <p style={styles.text}>
-          <strong>Junior</strong> and <strong>Renato</strong> have worked side by side for more than a decade, earning the trust of countless clients. Through life’s toughest challenges—Renato undergoing <strong>8 surgeries</strong> and Junior surviving a <strong>massive stroke</strong>—they are back with hearts full of joy and renewed purpose.
-        </p>
-        <p style={styles.text}>
-          Today, they’re building a new legacy through <strong>New Beginning Painting & Services</strong>, offering unbeatable craftsmanship and a customer-first experience that reflects their resilience and passion.
-        </p>
+      <h2 style={styles.heading}>About Us</h2>
 
-        <div style={styles.imageContainer}>
-          <div style={styles.imagePlaceholder}>[ Picture of Junior ]</div>
-          <div style={styles.imagePlaceholder}>[ Picture of Renato ]</div>
+      <div style={styles.content}>
+        <div style={styles.text}>
+          <p>
+            With over <strong>15 years of experience</strong> in painting residential homes and commercial buildings, we bring passion and excellence to every project.
+          </p>
+          <p>
+            <strong>Junior and Renato</strong> have worked side-by-side for more than a decade, building a reputation based on trust, quality, and reliability.
+          </p>
+          <p>
+            Through life's challenges — including Renato's <strong>8 surgeries</strong> and Junior's <strong>massive stroke</strong> — they never gave up. Instead, they returned with even more heart and determination.
+          </p>
+          <p>
+            Their mission now is stronger than ever: to deliver the <strong>best customer service</strong> and <strong>exceptional painting quality</strong> with a heart full of joy and gratitude.
+          </p>
         </div>
+
+        <div style={styles.imageBox}>
+  <img src="/junior.png" alt="Junior" style={styles.image} />
+  <p style={styles.caption}>Junior – Co-Founder</p>
+</div>
+
+<div style={styles.imageBox}>
+  <img src="/renato.jpg" alt="Renato" style={styles.image} />
+  <p style={styles.caption}>Renato – Co-Founder</p>
+</div>
+
       </div>
     </div>
   );
@@ -26,54 +38,44 @@ const AboutUs = () => {
 
 const styles = {
   container: {
-    padding: 30,
-    backgroundColor: '#111',
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  card: {
-    backgroundColor: '#000',
-    color: '#b59410',
     padding: 40,
-    borderRadius: 12,
-    boxShadow: '0 0 20px rgba(181, 148, 16, 0.5)',
-    maxWidth: 900,
-    width: '100%'
+    backgroundColor: '#111',
+    color: '#b59410',
+    minHeight: '100vh',
+    fontSize: '18px',
+    boxShadow: '0 0 15px rgba(0, 0, 0, 0.5)'
   },
-  title: {
-    fontSize: 32,
+  heading: {
+    fontSize: '32px',
     fontWeight: 'bold',
-    marginBottom: 25,
+    marginBottom: 30,
     textAlign: 'center'
+  },
+  content: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start'
   },
   text: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    lineHeight: 1.8,
-    marginBottom: 20
+    maxWidth: 500,
+    lineHeight: '1.8'
   },
-  imageContainer: {
-    display: 'flex',
-    justifyContent: 'space-evenly',
-    gap: 20,
-    marginTop: 30,
-    flexWrap: 'wrap'
-  },
-  imagePlaceholder: {
-    width: 200,
-    height: 200,
-    backgroundColor: '#222',
-    color: '#888',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '50%',
-    fontStyle: 'italic',
-    fontSize: 16,
+  imageBox: {
     textAlign: 'center'
+  },
+  image: {
+    width: 280,
+    borderRadius: '50%',
+    boxShadow: '0 0 10px rgba(255, 215, 0, 0.4)',
+    border: '2px solid #b59410'
+  },
+  caption: {
+    marginTop: 10,
+    fontStyle: 'italic',
+    fontWeight: 'bold'
   }
 };
 
-export default AboutUs;
+export default About;

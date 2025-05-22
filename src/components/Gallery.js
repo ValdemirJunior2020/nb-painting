@@ -1,11 +1,14 @@
 import React from 'react';
 
 const Gallery = () => {
-  const images = [
-    { id: 1, url: '/houses/house-1.jpg', title: 'Luxury Exterior' },
-    { id: 2, url: '/houses/house-2.jpg', title: 'beatiful Finish' },
-    { id: 3, url: '/houses/house-3.jpg', title: 'Modern House Paint' }
-  ];
+const images = [
+  { id: 1, url: '/houses/house-1.jpg', title: 'Luxury Exterior' },
+  { id: 2, url: '/houses/house-2.jpg', title: 'Beautiful Finish' },
+  { id: 3, url: '/houses/house-3.jpg', title: 'Modern House Paint' },
+  { id: 4, url: '/houses/house-4.jpg', title: 'Homeless Community' },
+  { id: 5, url:  '/houses/house-5.jpg', title: 'Buildings'}
+];
+
 
   return (
     <div style={styles.container}>
