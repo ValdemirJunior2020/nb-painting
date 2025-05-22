@@ -117,7 +117,7 @@ const EstimateForm = () => {
 
   return (
     <div style={styles.container}>
-      <h2>Submit a Painting Estimate</h2>
+      <h2>Submit a Painting Quote Request</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input type="text" name="name" placeholder="Full Name" value={form.name} onChange={handleChange} required />
         <input type="text" name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} required />
