@@ -11,7 +11,8 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email === 'jesus@controla.com') {
+      if (user && user.email === 'jesus1@controla.com') {
+
         setIsAdmin(true);
         fetchEstimates();
       } else {
@@ -55,6 +56,8 @@ const AdminDashboard = () => {
       ) : (
         estimates.map((est) => (
           <div key={est.id} style={styles.card}>
+            <p><strong>Phone Number:</strong> {est.phoneNumber || 'N/A'}</p>
+            <p><strong>Address:</strong> {est.address || 'N/A'}</p>
             <p><strong>Square Feet:</strong> {est.squareFeet}</p>
             <p><strong>Color:</strong> <span style={{ color: est.colorHex }}>{est.colorHex}</span></p>
             <p><strong>Price:</strong> ${est.price}</p>

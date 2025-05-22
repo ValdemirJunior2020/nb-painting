@@ -8,15 +8,15 @@ const EstimateForm = () => {
   const [form, setForm] = useState({
     squareFeet: '',
     colorHex: '#b59410',
-    notes: ''
+    notes: '',
+    address: '',
+    phone: ''
   });
 
   const [image, setImage] = useState(null);
   const [message, setMessage] = useState('');
-
   const navigate = useNavigate();
 
-  // Redirect if user is not logged in
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (!user) {
@@ -56,13 +56,21 @@ const EstimateForm = () => {
         squareFeet: form.squareFeet,
         colorHex: form.colorHex,
         notes: form.notes,
+        address: form.address,
+        phone: form.phone,
         price: totalPrice,
         imageUrl,
         timestamp: serverTimestamp()
       });
 
       setMessage("Your request was submitted successfully. We will contact you as soon as possible!");
-      setForm({ squareFeet: '', colorHex: '#b59410', notes: '' });
+      setForm({
+        squareFeet: '',
+        colorHex: '#b59410',
+        notes: '',
+        address: '',
+        phone: ''
+      });
       setImage(null);
     } catch (error) {
       console.error(error);
@@ -70,7 +78,6 @@ const EstimateForm = () => {
     }
   };
 
-  // Convert uploaded image to PNG
   const convertImageToPng = (file) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -98,6 +105,22 @@ const EstimateForm = () => {
       <h2>Submit a Painting Estimate</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
+          type="text"
+          name="address"
+          placeholder="Your Address"
+          value={form.address}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="phone"
+          placeholder="Your Phone Number"
+          value={form.phone}
+          onChange={handleChange}
+          required
+        />
+        <input
           type="number"
           name="squareFeet"
           placeholder="Square Feet"
@@ -105,7 +128,6 @@ const EstimateForm = () => {
           onChange={handleChange}
           required
         />
-
         <label>
           Select the new color you want:
           <input
@@ -116,7 +138,6 @@ const EstimateForm = () => {
             style={{ marginLeft: '10px' }}
           />
         </label>
-
         <label>
           Upload a picture of your house:
           <input
@@ -131,14 +152,12 @@ const EstimateForm = () => {
             }}
           />
         </label>
-
         <textarea
           name="notes"
           placeholder="Additional Notes (e.g., interior, fence, etc.)"
           value={form.notes}
           onChange={handleChange}
         />
-
         <p><strong>Total Price:</strong> ${form.squareFeet ? form.squareFeet * 2 : 0}</p>
         <button type="submit">Submit Estimate</button>
       </form>

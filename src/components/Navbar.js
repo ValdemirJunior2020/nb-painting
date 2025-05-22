@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auth } from '../firebase/firebaseConfig';
 
 const Navbar = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const handleLogout = () => {
     auth.signOut();
     alert("Logged out!");
@@ -15,7 +24,9 @@ const Navbar = () => {
       <Link to="/login" style={styles.link}>Login</Link>
       <Link to="/estimate" style={styles.link}>Estimate</Link>
       <Link to="/my-estimates" style={styles.link}>My Estimates</Link>
-      <Link to="/admin" style={styles.link}>Admin</Link>
+      {user?.email === 'jesus1@controla.com' && (
+        <Link to="/admin" style={styles.link}>Admin</Link>
+      )}
       <Link to="/gallery" style={styles.link}>Gallery</Link>
       <Link to="/reviews" style={styles.link}>Reviews</Link>
       <button onClick={handleLogout} style={styles.logout}>Logout</button>
