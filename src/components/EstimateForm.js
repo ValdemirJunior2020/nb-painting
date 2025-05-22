@@ -7,10 +7,12 @@ import { useNavigate } from 'react-router-dom';
 const EstimateForm = () => {
   const [form, setForm] = useState({
     name: '',
-    address: '',
     phone: '',
-    squareFeet: '',
+    address: '',
+    city: '',
+    state: '',
     height: '',
+    squareFeet: '',
     colorHex: '#b59410',
     notes: ''
   });
@@ -26,7 +28,6 @@ const EstimateForm = () => {
         navigate('/signup');
       }
     });
-
     return () => unsubscribe();
   }, [navigate]);
 
@@ -56,24 +57,29 @@ const EstimateForm = () => {
       await setDoc(doc(db, 'estimates', estimateId), {
         userId: uid,
         name: form.name,
-        address: form.address,
         phone: form.phone,
-        squareFeet: form.squareFeet,
+        address: form.address,
+        city: form.city,
+        state: form.state,
         height: form.height,
+        squareFeet: form.squareFeet,
         colorHex: form.colorHex,
         notes: form.notes,
         price: totalPrice,
         imageUrl,
+        status: 'Pending',
         timestamp: serverTimestamp()
       });
 
       setMessage("Your request was submitted successfully. We will contact you as soon as possible!");
       setForm({
         name: '',
-        address: '',
         phone: '',
-        squareFeet: '',
+        address: '',
+        city: '',
+        state: '',
         height: '',
+        squareFeet: '',
         colorHex: '#b59410',
         notes: ''
       });
@@ -108,57 +114,18 @@ const EstimateForm = () => {
 
   return (
     <div style={styles.container}>
-      <h2>Submit a Quote Request</h2>
+      <h2>Submit a Painting Estimate</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Your Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="address"
-          placeholder="Your Address"
-          value={form.address}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="phone"
-          placeholder="Your Phone Number"
-          value={form.phone}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="number"
-          name="squareFeet"
-          placeholder="Square Feet"
-          value={form.squareFeet}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="number"
-          name="height"
-          placeholder="Approximate Height (in feet)"
-          value={form.height}
-          onChange={handleChange}
-          required
-        />
+        <input type="text" name="name" placeholder="Your Full Name" value={form.name} onChange={handleChange} required />
+        <input type="text" name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} required />
+        <input type="text" name="address" placeholder="Address" value={form.address} onChange={handleChange} required />
+        <input type="text" name="city" placeholder="City" value={form.city} onChange={handleChange} required />
+        <input type="text" name="state" placeholder="State" value={form.state} onChange={handleChange} required />
+        <input type="number" name="height" placeholder="Approximate Wall Height (ft)" value={form.height} onChange={handleChange} required />
+        <input type="number" name="squareFeet" placeholder="Square Feet" value={form.squareFeet} onChange={handleChange} required />
         <label>
           Select the new color you want:
-          <input
-            type="color"
-            name="colorHex"
-            value={form.colorHex}
-            onChange={handleChange}
-            style={{ marginLeft: '10px' }}
-          />
+          <input type="color" name="colorHex" value={form.colorHex} onChange={handleChange} style={{ marginLeft: '10px' }} />
         </label>
         <label>
           Upload a picture of your house:
@@ -174,12 +141,7 @@ const EstimateForm = () => {
             }}
           />
         </label>
-        <textarea
-          name="notes"
-          placeholder="Additional Notes (e.g., interior, fence, etc.)"
-          value={form.notes}
-          onChange={handleChange}
-        />
+        <textarea name="notes" placeholder="Additional Notes (e.g., interior, fence, etc.)" value={form.notes} onChange={handleChange} />
         <p><strong>Total Price:</strong> ${form.squareFeet ? form.squareFeet * 2 : 0}</p>
         <button type="submit">Submit Estimate</button>
       </form>

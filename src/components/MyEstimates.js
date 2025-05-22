@@ -13,18 +13,24 @@ const MyEstimates = () => {
       if (!user) {
         alert("Please sign up or log in to view your estimates.");
         navigate('/signup');
-      } else {
+        return;
+      }
+
+      try {
         const q = query(
           collection(db, 'estimates'),
           where('userId', '==', user.uid),
           orderBy('timestamp', 'desc')
         );
-        const querySnapshot = await getDocs(q);
-        const results = querySnapshot.docs.map(doc => ({
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
-        setEstimates(results);
+        setEstimates(data);
+      } catch (error) {
+        console.error("Error fetching estimates:", error);
+      } finally {
         setLoading(false);
       }
     });
@@ -37,23 +43,33 @@ const MyEstimates = () => {
       <h2>My Painting Estimates</h2>
       {loading ? (
         <p>Loading...</p>
+      ) : estimates.length === 0 ? (
+        <p>You haven’t submitted any estimates yet.</p>
       ) : (
-        estimates.map((est) => (
+        estimates.map(est => (
           <div key={est.id} style={styles.card}>
             <p><strong>Name:</strong> {est.name}</p>
             <p><strong>Phone:</strong> {est.phone}</p>
             <p><strong>Address:</strong> {est.address}</p>
             <p><strong>City:</strong> {est.city}</p>
             <p><strong>State:</strong> {est.state}</p>
-            <p><strong>Square Feet:</strong> {est.squareFeet}</p>
             <p><strong>Height:</strong> {est.height} ft</p>
+            <p><strong>Square Feet:</strong> {est.squareFeet}</p>
             <p><strong>Color:</strong> <span style={{ color: est.colorHex }}>{est.colorHex}</span></p>
             <p><strong>Price:</strong> ${est.price}</p>
-            {est.imageUrl && (
-              <img src={est.imageUrl} alt="House" style={styles.image} />
-            )}
+            {est.imageUrl && <img src={est.imageUrl} alt="House" style={styles.image} />}
             <p><strong>Notes:</strong> {est.notes || 'N/A'}</p>
             <p><strong>Submitted:</strong> {est.timestamp?.toDate().toLocaleString()}</p>
+            <p><strong>Status:</strong>{' '}
+              <span style={{
+                ...styles.badge,
+                backgroundColor:
+                  est.status === 'Approved' ? 'green' :
+                  est.status === 'Rejected' ? 'red' : 'gray'
+              }}>
+                {est.status || 'Pending'}
+              </span>
+            </p>
           </div>
         ))
       )}
@@ -79,6 +95,12 @@ const styles = {
     maxWidth: 300,
     marginTop: 10,
     borderRadius: 8
+  },
+  badge: {
+    padding: '4px 10px',
+    color: 'white',
+    borderRadius: '5px',
+    fontWeight: 'bold'
   }
 };
 

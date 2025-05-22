@@ -1,126 +1,110 @@
 import React, { useEffect, useState } from 'react';
-import { db, auth, storage } from '../firebase/firebaseConfig';
+import { db, auth,  } from '../firebase/firebaseConfig';
 import {
   collection,
   getDocs,
-  query,
-  orderBy,
   deleteDoc,
+  updateDoc,
   doc,
-  updateDoc
+  query,
+  orderBy
 } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const AdminDashboard = () => {
   const [estimates, setEstimates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email === 'jesus1@controla.com') {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user?.email === 'jesus1@controla.com') {
         setIsAdmin(true);
-        fetchEstimates();
-      } else {
-        setIsAdmin(false);
+        await fetchEstimates();
       }
-      setCheckingAuth(false);
+      setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
   const fetchEstimates = async () => {
-    try {
-      const q = query(collection(db, 'estimates'), orderBy('timestamp', 'desc'));
-      const querySnapshot = await getDocs(q);
-      const results = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setEstimates(results);
-    } catch (error) {
-      console.error("Error fetching estimates:", error);
-    } finally {
-      setLoading(false);
-    }
+    const q = query(collection(db, 'estimates'), orderBy('timestamp', 'desc'));
+    const snapshot = await getDocs(q);
+    const items = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setEstimates(items);
+  };
+
+  const handleApprove = async (id) => {
+    await updateDoc(doc(db, 'estimates', id), { status: 'Approved' });
+    fetchEstimates();
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this estimate?")) {
+    if (window.confirm("Are you sure to delete this estimate?")) {
       await deleteDoc(doc(db, 'estimates', id));
       fetchEstimates();
     }
   };
 
-  const handleStatusChange = async (id, status) => {
-    await updateDoc(doc(db, 'estimates', id), { status });
-    fetchEstimates();
-  };
-
-  const downloadPDF = async (estimate) => {
+  const handleDownloadPDF = (estimate) => {
     const docPdf = new jsPDF();
+    docPdf.addImage('/logo.png', 'PNG', 10, 8, 30, 15);
+
     docPdf.setFontSize(16);
-    docPdf.text("Estimate Summary", 20, 20);
+    docPdf.text("Painting Estimate", 70, 20);
 
-    const lines = [
-      `Name: ${estimate.name || 'N/A'}`,
-      `Phone: ${estimate.phone || 'N/A'}`,
-      `Address: ${estimate.address || 'N/A'}`,
-      `City: ${estimate.city || 'N/A'}`,
-      `State: ${estimate.state || 'N/A'}`,
-      `Height: ${estimate.height || 'N/A'} ft`,
-      `Square Feet: ${estimate.squareFeet}`,
-      `Color: ${estimate.colorHex}`,
-      `Price: $${estimate.price}`,
-      `Notes: ${estimate.notes || 'N/A'}`,
-      `Submitted: ${estimate.timestamp?.toDate().toLocaleString()}`
-    ];
+    autoTable(docPdf, {
+      startY: 30,
+      head: [['Field', 'Value']],
+      body: [
+        ['Name', estimate.name],
+        ['Address', estimate.address],
+        ['City', estimate.city],
+        ['State', estimate.state],
+        ['Phone', estimate.phone],
+        ['Square Feet', estimate.squareFeet],
+        ['Wall Height', estimate.height],
+        ['Color Hex', estimate.colorHex],
+        ['Notes', estimate.notes],
+        ['Price', `$${estimate.price}`],
+        ['Status', estimate.status || 'Pending']
+      ]
+    });
 
-    lines.forEach((line, i) => docPdf.text(line, 20, 30 + i * 10));
-    docPdf.save(`estimate_${estimate.name || 'client'}.pdf`);
+    docPdf.save(`Estimate-${estimate.name}.pdf`);
   };
 
-  if (checkingAuth) {
-    return <p style={styles.text}>Checking admin credentials...</p>;
-  }
-
-  if (!isAdmin) {
-    return <p style={styles.text}>Access Denied. Admins only.</p>;
-  }
+  if (!isAdmin) return <p style={{ color: '#fff', padding: 50 }}>Access Denied. Admins only.</p>;
 
   return (
-    <div style={styles.container}>
+    <div style={{ padding: 20, backgroundColor: '#111', color: '#ffd700', minHeight: '100vh' }}>
       <h2>Admin - All Estimates</h2>
       {loading ? (
         <p>Loading estimates...</p>
       ) : (
         estimates.map((est) => (
-          <div key={est.id} style={styles.card}>
+          <div key={est.id} style={{ border: '1px solid #ffd700', padding: 15, marginBottom: 20, borderRadius: 8 }}>
             <p><strong>Name:</strong> {est.name}</p>
+            <p><strong>Address:</strong> {est.address}, {est.city}, {est.state}</p>
             <p><strong>Phone:</strong> {est.phone}</p>
-            <p><strong>Address:</strong> {est.address}</p>
-            <p><strong>City:</strong> {est.city}</p>
-            <p><strong>State:</strong> {est.state}</p>
-            <p><strong>Height:</strong> {est.height} ft</p>
             <p><strong>Square Feet:</strong> {est.squareFeet}</p>
+            <p><strong>Wall Height:</strong> {est.height}</p>
             <p><strong>Color:</strong> <span style={{ color: est.colorHex }}>{est.colorHex}</span></p>
             <p><strong>Price:</strong> ${est.price}</p>
-            {est.imageUrl && (
-              <img src={est.imageUrl} alt="House" style={styles.image} />
-            )}
             <p><strong>Notes:</strong> {est.notes || 'N/A'}</p>
-            <p><strong>Submitted:</strong> {est.timestamp?.toDate().toLocaleString()}</p>
-            <p><strong>Status:</strong> {est.status || 'Pending'}</p>
-
-            <div style={styles.buttonGroup}>
-              <button style={styles.approve} onClick={() => handleStatusChange(est.id, 'Approved')}>Approve</button>
-              <button style={styles.reject} onClick={() => handleStatusChange(est.id, 'Rejected')}>Reject</button>
-              <button style={styles.delete} onClick={() => handleDelete(est.id)}>Delete</button>
-              <button style={styles.download} onClick={() => downloadPDF(est)}>Download PDF</button>
+            <p><strong>Status:</strong> <span style={{ color: est.status === 'Approved' ? 'lightgreen' : 'orange' }}>{est.status || 'Pending'}</span></p>
+            {est.imageUrl && (
+              <img src={est.imageUrl} alt="House" style={{ width: 280, marginTop: 10, borderRadius: 8 }} />
+            )}
+            <div style={{ marginTop: 10 }}>
+              <button onClick={() => handleApprove(est.id)} style={btn.green}>Approve</button>
+              <button onClick={() => handleDelete(est.id)} style={btn.red}>Delete</button>
+              <button onClick={() => handleDownloadPDF(est)} style={btn.pdf}>Download PDF</button>
             </div>
           </div>
         ))
@@ -129,62 +113,27 @@ const AdminDashboard = () => {
   );
 };
 
-const styles = {
-  container: {
-    padding: 30,
-    backgroundColor: '#111',
-    color: '#ffd700',
-    minHeight: '100vh'
-  },
-  text: {
-    textAlign: 'center',
-    paddingTop: 100,
-    color: '#ffd700',
-    fontSize: 18
-  },
-  card: {
-    border: '1px solid #ffd700',
-    borderRadius: 8,
-    padding: 20,
-    marginBottom: 20
-  },
-  image: {
-    width: '100%',
-    maxWidth: 300,
-    marginTop: 10,
-    borderRadius: 8
-  },
-  buttonGroup: {
-    marginTop: 15,
-    display: 'flex',
-    gap: 10,
-    flexWrap: 'wrap'
-  },
-  approve: {
-    backgroundColor: 'green',
-    color: 'white',
-    padding: '5px 10px',
+const btn = {
+  green: {
+    background: 'green',
+    color: '#fff',
+    padding: '6px 12px',
+    marginRight: 10,
     border: 'none',
     cursor: 'pointer'
   },
-  reject: {
-    backgroundColor: 'orange',
-    color: 'white',
-    padding: '5px 10px',
+  red: {
+    background: 'crimson',
+    color: '#fff',
+    padding: '6px 12px',
+    marginRight: 10,
     border: 'none',
     cursor: 'pointer'
   },
-  delete: {
-    backgroundColor: 'red',
-    color: 'white',
-    padding: '5px 10px',
-    border: 'none',
-    cursor: 'pointer'
-  },
-  download: {
-    backgroundColor: '#555',
-    color: 'white',
-    padding: '5px 10px',
+  pdf: {
+    background: '#ffd700',
+    color: '#000',
+    padding: '6px 12px',
     border: 'none',
     cursor: 'pointer'
   }
