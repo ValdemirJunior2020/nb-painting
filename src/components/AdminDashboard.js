@@ -6,8 +6,8 @@ import {
   deleteDoc,
   updateDoc,
   doc,
-  query,
-  orderBy
+  orderBy,
+  query
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import jsPDF from 'jspdf';
@@ -17,94 +17,109 @@ const AdminDashboard = () => {
   const [estimates, setEstimates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user?.email === 'jesus1@controla.com') {
         setIsAdmin(true);
         await fetchEstimates();
+      } else {
+        setIsAdmin(false);
       }
-      setLoading(false);
+      setCheckingAuth(false);
     });
+
     return () => unsubscribe();
   }, []);
 
   const fetchEstimates = async () => {
+    setLoading(true);
     const q = query(collection(db, 'estimates'), orderBy('timestamp', 'desc'));
     const snapshot = await getDocs(q);
-    const items = snapshot.docs.map(doc => ({
+    const data = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-    setEstimates(items);
+    setEstimates(data);
+    setLoading(false);
   };
 
-  const handleApprove = async (id) => {
-    await updateDoc(doc(db, 'estimates', id), { status: 'Approved' });
+  const deleteEstimate = async (id) => {
+    await deleteDoc(doc(db, 'estimates', id));
+    alert("Estimate deleted");
     fetchEstimates();
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure to delete this estimate?")) {
-      await deleteDoc(doc(db, 'estimates', id));
-      fetchEstimates();
-    }
+  const updateStatus = async (id, status) => {
+    await updateDoc(doc(db, 'estimates', id), { status });
+    fetchEstimates();
   };
 
-  const handleDownloadPDF = (estimate) => {
-    const docPdf = new jsPDF();
-    docPdf.addImage('/logo.png', 'PNG', 10, 8, 30, 15);
+  const downloadPDF = (estimate) => {
+    const docPDF = new jsPDF();
+    docPDF.setFontSize(16);
+    docPDF.text('Painting Estimate Summary', 14, 20);
 
-    docPdf.setFontSize(16);
-    docPdf.text("Painting Estimate", 70, 20);
-
-    autoTable(docPdf, {
+    autoTable(docPDF, {
       startY: 30,
-      head: [['Field', 'Value']],
       body: [
         ['Name', estimate.name],
+        ['Phone', estimate.phone],
         ['Address', estimate.address],
         ['City', estimate.city],
         ['State', estimate.state],
-        ['Phone', estimate.phone],
         ['Square Feet', estimate.squareFeet],
-        ['Wall Height', estimate.height],
-        ['Color Hex', estimate.colorHex],
-        ['Notes', estimate.notes],
+        ['Height', estimate.height + ' ft'],
+        ['Color', estimate.colorHex],
         ['Price', `$${estimate.price}`],
-        ['Status', estimate.status || 'Pending']
-      ]
+        ['Notes', estimate.notes || 'N/A'],
+        ['Status', estimate.status || 'Pending'],
+      ],
+      theme: 'grid'
     });
 
-    docPdf.save(`Estimate-${estimate.name}.pdf`);
+    docPDF.save(`Estimate-${estimate.name || estimate.id}.pdf`);
   };
 
-  if (!isAdmin) return <p style={{ color: '#fff', padding: 50 }}>Access Denied. Admins only.</p>;
+  if (checkingAuth) return <p style={styles.text}>Checking admin credentials...</p>;
+  if (!isAdmin) return <p style={styles.text}>Access Denied. Admins only.</p>;
 
   return (
-    <div style={{ padding: 20, backgroundColor: '#111', color: '#ffd700', minHeight: '100vh' }}>
+    <div style={styles.container}>
       <h2>Admin - All Estimates</h2>
       {loading ? (
         <p>Loading estimates...</p>
       ) : (
-        estimates.map((est) => (
-          <div key={est.id} style={{ border: '1px solid #ffd700', padding: 15, marginBottom: 20, borderRadius: 8 }}>
+        estimates.map(est => (
+          <div key={est.id} style={styles.card}>
             <p><strong>Name:</strong> {est.name}</p>
-            <p><strong>Address:</strong> {est.address}, {est.city}, {est.state}</p>
             <p><strong>Phone:</strong> {est.phone}</p>
+            <p><strong>Address:</strong> {est.address}</p>
+            <p><strong>City:</strong> {est.city}</p>
+            <p><strong>State:</strong> {est.state}</p>
+            <p><strong>Height:</strong> {est.height} ft</p>
             <p><strong>Square Feet:</strong> {est.squareFeet}</p>
-            <p><strong>Wall Height:</strong> {est.height}</p>
             <p><strong>Color:</strong> <span style={{ color: est.colorHex }}>{est.colorHex}</span></p>
             <p><strong>Price:</strong> ${est.price}</p>
+            {est.imageUrl && <img src={est.imageUrl} alt="House" style={styles.image} />}
             <p><strong>Notes:</strong> {est.notes || 'N/A'}</p>
-            <p><strong>Status:</strong> <span style={{ color: est.status === 'Approved' ? 'lightgreen' : 'orange' }}>{est.status || 'Pending'}</span></p>
-            {est.imageUrl && (
-              <img src={est.imageUrl} alt="House" style={{ width: 280, marginTop: 10, borderRadius: 8 }} />
-            )}
-            <div style={{ marginTop: 10 }}>
-              <button onClick={() => handleApprove(est.id)} style={btn.green}>Approve</button>
-              <button onClick={() => handleDelete(est.id)} style={btn.red}>Delete</button>
-              <button onClick={() => handleDownloadPDF(est)} style={btn.pdf}>Download PDF</button>
+            <p><strong>Status:</strong>{' '}
+              <span style={{
+                ...styles.badge,
+                backgroundColor:
+                  est.status === 'Approved' ? 'green' :
+                  est.status === 'Rejected' ? 'red' : 'gray'
+              }}>
+                {est.status || 'Pending'}
+              </span>
+            </p>
+
+            <div style={styles.buttons}>
+              <button onClick={() => updateStatus(est.id, 'Approved')} style={styles.approve}>Approve</button>
+              <button onClick={() => updateStatus(est.id, 'Rejected')} style={styles.reject}>Reject</button>
+              <button onClick={() => deleteEstimate(est.id)} style={styles.delete}>Delete</button>
+              <button onClick={() => downloadPDF(est)} style={styles.download}>Download PDF</button>
             </div>
           </div>
         ))
@@ -113,28 +128,72 @@ const AdminDashboard = () => {
   );
 };
 
-const btn = {
-  green: {
-    background: 'green',
-    color: '#fff',
-    padding: '6px 12px',
-    marginRight: 10,
+const styles = {
+  container: {
+    padding: 30,
+    backgroundColor: '#111',
+    color: '#ffd700',
+    minHeight: '100vh'
+  },
+  text: {
+    color: '#ffd700',
+    textAlign: 'center',
+    marginTop: 50
+  },
+  card: {
+    border: '1px solid #ffd700',
+    borderRadius: 8,
+    padding: 20,
+    marginBottom: 30
+  },
+  image: {
+    width: '100%',
+    maxWidth: 300,
+    marginTop: 10,
+    borderRadius: 8
+  },
+  badge: {
+    padding: '5px 12px',
+    color: 'white',
+    borderRadius: 5,
+    fontWeight: 'bold'
+  },
+  buttons: {
+    marginTop: 10,
+    display: 'flex',
+    gap: 10,
+    flexWrap: 'wrap'
+  },
+  approve: {
+    backgroundColor: 'green',
+    color: 'white',
     border: 'none',
+    padding: '6px 12px',
+    borderRadius: 5,
     cursor: 'pointer'
   },
-  red: {
-    background: 'crimson',
-    color: '#fff',
-    padding: '6px 12px',
-    marginRight: 10,
+  reject: {
+    backgroundColor: 'red',
+    color: 'white',
     border: 'none',
+    padding: '6px 12px',
+    borderRadius: 5,
     cursor: 'pointer'
   },
-  pdf: {
-    background: '#ffd700',
-    color: '#000',
-    padding: '6px 12px',
+  delete: {
+    backgroundColor: '#8b0000',
+    color: 'white',
     border: 'none',
+    padding: '6px 12px',
+    borderRadius: 5,
+    cursor: 'pointer'
+  },
+  download: {
+    backgroundColor: '#0066cc',
+    color: 'white',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: 5,
     cursor: 'pointer'
   }
 };

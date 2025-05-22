@@ -11,8 +11,8 @@ const EstimateForm = () => {
     address: '',
     city: '',
     state: '',
-    height: '',
     squareFeet: '',
+    height: '',
     colorHex: '#b59410',
     notes: ''
   });
@@ -28,6 +28,7 @@ const EstimateForm = () => {
         navigate('/signup');
       }
     });
+
     return () => unsubscribe();
   }, [navigate]);
 
@@ -52,7 +53,9 @@ const EstimateForm = () => {
         imageUrl = await getDownloadURL(imageRef);
       }
 
-      const totalPrice = parseFloat(form.squareFeet) * 2;
+      const squareFeet = parseFloat(form.squareFeet);
+      const height = parseFloat(form.height);
+      const totalPrice = (squareFeet * (height || 1)) * 2;
 
       await setDoc(doc(db, 'estimates', estimateId), {
         userId: uid,
@@ -61,14 +64,14 @@ const EstimateForm = () => {
         address: form.address,
         city: form.city,
         state: form.state,
-        height: form.height,
         squareFeet: form.squareFeet,
+        height: form.height,
         colorHex: form.colorHex,
         notes: form.notes,
         price: totalPrice,
         imageUrl,
-        status: 'Pending',
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        status: 'Pending'
       });
 
       setMessage("Your request was submitted successfully. We will contact you as soon as possible!");
@@ -78,8 +81,8 @@ const EstimateForm = () => {
         address: '',
         city: '',
         state: '',
-        height: '',
         squareFeet: '',
+        height: '',
         colorHex: '#b59410',
         notes: ''
       });
@@ -116,33 +119,31 @@ const EstimateForm = () => {
     <div style={styles.container}>
       <h2>Submit a Painting Estimate</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
-        <input type="text" name="name" placeholder="Your Full Name" value={form.name} onChange={handleChange} required />
+        <input type="text" name="name" placeholder="Full Name" value={form.name} onChange={handleChange} required />
         <input type="text" name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} required />
         <input type="text" name="address" placeholder="Address" value={form.address} onChange={handleChange} required />
         <input type="text" name="city" placeholder="City" value={form.city} onChange={handleChange} required />
         <input type="text" name="state" placeholder="State" value={form.state} onChange={handleChange} required />
-        <input type="number" name="height" placeholder="Approximate Wall Height (ft)" value={form.height} onChange={handleChange} required />
         <input type="number" name="squareFeet" placeholder="Square Feet" value={form.squareFeet} onChange={handleChange} required />
+        <input type="number" name="height" placeholder="Approximate Wall Height (ft)" value={form.height} onChange={handleChange} required />
+
         <label>
           Select the new color you want:
           <input type="color" name="colorHex" value={form.colorHex} onChange={handleChange} style={{ marginLeft: '10px' }} />
         </label>
+
         <label>
           Upload a picture of your house:
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={async (e) => {
-              if (e.target.files && e.target.files[0]) {
-                const pngFile = await convertImageToPng(e.target.files[0]);
-                setImage(pngFile);
-              }
-            }}
-          />
+          <input type="file" accept="image/*" capture="environment" onChange={async (e) => {
+            if (e.target.files && e.target.files[0]) {
+              const pngFile = await convertImageToPng(e.target.files[0]);
+              setImage(pngFile);
+            }
+          }} />
         </label>
+
         <textarea name="notes" placeholder="Additional Notes (e.g., interior, fence, etc.)" value={form.notes} onChange={handleChange} />
-        <p><strong>Total Price:</strong> ${form.squareFeet ? form.squareFeet * 2 : 0}</p>
+        <p><strong>Total Price:</strong> ${form.squareFeet && form.height ? form.squareFeet * form.height * 2 : 0}</p>
         <button type="submit">Submit Estimate</button>
       </form>
       {message && <p style={styles.message}>{message}</p>}

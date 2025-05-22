@@ -97,7 +97,7 @@ const styles = {
     borderRadius: 8
   },
   badge: {
-    padding: '4px 10px',
+    padding: '5px 12px',
     color: 'white',
     borderRadius: '5px',
     fontWeight: 'bold'
