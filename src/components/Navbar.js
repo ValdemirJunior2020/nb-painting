@@ -27,8 +27,9 @@ const Navbar = () => {
       {user?.email === 'jesus1@controla.com' && (
         <Link to="/admin" style={styles.link}>Admin</Link>
       )}
-      <Link to="/gallery" style={styles.link}>Gallery</Link>
+      <Link to="/projects" style={styles.link}>Gallery</Link>
       <Link to="/reviews" style={styles.link}>Reviews</Link>
+      <Link to="/about" style={styles.link}>About Us</Link>
       <button onClick={handleLogout} style={styles.logout}>Logout</button>
     </nav>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import SignUp from './components/SignUp'; // corrected filename
+import SignUp from './components/SignUp';
 import Login from './components/Login';
 import EstimateForm from './components/EstimateForm';
 import MyEstimates from './components/MyEstimates';
@@ -9,6 +9,7 @@ import AdminDashboard from './components/AdminDashboard';
 import Gallery from './components/Gallery';
 import Reviews from './components/Reviews';
 import LandingPage from './components/LandingPage';
+import AboutUs from './components/AboutUs'; // ✅ Make sure this file exists
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/projects" element={<Gallery />} />
         <Route path="/reviews" element={<Reviews />} />
+        <Route path="/about" element={<AboutUs />} />
       </Routes>
     </Router>
   );

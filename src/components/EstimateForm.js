@@ -55,7 +55,8 @@ const EstimateForm = () => {
 
       const squareFeet = parseFloat(form.squareFeet);
       const height = parseFloat(form.height);
-      const totalPrice = (squareFeet * (height || 1)) * 2;
+      const totalPrice = (squareFeet * (height || 1)) * 1.5;
+
 
       await setDoc(doc(db, 'estimates', estimateId), {
         userId: uid,
