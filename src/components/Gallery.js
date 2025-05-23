@@ -1,11 +1,24 @@
 // src/components/Gallery.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { getStorage, ref, listAll, getDownloadURL, deleteObject } from 'firebase/storage';
+import { auth } from '../firebase/firebaseConfig';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
+  const [enlargedImage, setEnlargedImage] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const storage = getStorage();
 
+  // Track current user
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) setUserEmail(user.email);
+      else setUserEmail(null);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch images
   const fetchImages = useCallback(async () => {
     try {
       const folderRef = ref(storage, 'gallery');
@@ -22,6 +35,7 @@ const Gallery = () => {
     }
   }, [storage]);
 
+  // Delete image
   const handleDelete = async (path) => {
     try {
       const imageRef = ref(storage, path);
@@ -44,11 +58,24 @@ const Gallery = () => {
       <div style={styles.grid}>
         {images.map((img, index) => (
           <div key={index} style={styles.card}>
-            <img src={img.url} alt={`Project ${index}`} style={styles.image} />
-            <button onClick={() => handleDelete(img.path)} style={styles.deleteBtn}>Delete</button>
+            <img
+              src={img.url}
+              alt={`Project ${index}`}
+              style={styles.image}
+              onClick={() => setEnlargedImage(img.url)}
+            />
+            {userEmail === 'jesus1@controla.com' && (
+              <button onClick={() => handleDelete(img.path)} style={styles.deleteBtn}>Delete</button>
+            )}
           </div>
         ))}
       </div>
+
+      {enlargedImage && (
+        <div style={styles.modalOverlay} onClick={() => setEnlargedImage(null)}>
+          <img src={enlargedImage} alt="Enlarged" style={styles.enlargedImage} />
+        </div>
+      )}
     </div>
   );
 };
@@ -73,11 +100,13 @@ const styles = {
     width: 250,
     textAlign: 'center',
     backgroundColor: '#222',
+    position: 'relative',
   },
   image: {
     width: '100%',
     borderRadius: 6,
     marginBottom: 10,
+    cursor: 'pointer',
   },
   deleteBtn: {
     backgroundColor: '#b59410',
@@ -87,6 +116,20 @@ const styles = {
     fontWeight: 'bold',
     borderRadius: 4,
     cursor: 'pointer',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+  },
+  enlargedImage: {
+    maxWidth: '90%',
+    maxHeight: '90%',
+    borderRadius: 10,
   },
 };
 
