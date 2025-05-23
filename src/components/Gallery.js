@@ -1,140 +1,66 @@
 // src/components/Gallery.js
-import React, { useEffect, useState, useCallback } from 'react';
-import { getStorage, ref, listAll, getDownloadURL, deleteObject } from 'firebase/storage';
-import { auth } from '../firebase/firebaseConfig';
+import React, { useEffect, useState } from 'react';
+import { getStorage, ref, listAll, getDownloadURL } from 'firebase/storage';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const storage = getStorage();
-
-  // Define fetchImages with useCallback to avoid eslint warning
-  const fetchImages = useCallback(async () => {
-    try {
-      const folderRef = ref(storage, 'gallery');
-      const result = await listAll(folderRef);
-      const urls = await Promise.all(
-        result.items.map(async (itemRef) => {
-          const url = await getDownloadURL(itemRef);
-          return { name: itemRef.name, url, path: itemRef.fullPath };
-        })
-      );
-      setImages(urls);
-    } catch (err) {
-      console.error('Error fetching images:', err);
-    }
-  }, [storage]);
-
-  const handleDelete = async (path) => {
-    try {
-      const imageRef = ref(storage, path);
-      await deleteObject(imageRef);
-      alert('Image deleted');
-      fetchImages();
-    } catch (err) {
-      console.error('Error deleting image:', err);
-      alert('Failed to delete image');
-    }
-  };
+  const [selectedImg, setSelectedImg] = useState(null);
 
   useEffect(() => {
-    fetchImages();
-
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user?.email === 'jesus1@controla.com') {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
+    const fetchImages = async () => {
+      try {
+        const storage = getStorage();
+        const folderRef = ref(storage, 'gallery');
+        const result = await listAll(folderRef);
+        const urls = await Promise.all(
+          result.items.map(async (itemRef) => {
+            const url = await getDownloadURL(itemRef);
+            return { name: itemRef.name, url };
+          })
+        );
+        setImages(urls);
+      } catch (err) {
+        console.error('Error fetching gallery images:', err);
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, [fetchImages]);
+    fetchImages();
+  }, []);
 
   return (
-    <div style={styles.container}>
-      <h2>Our Painting Projects</h2>
-      <div style={styles.grid}>
+    <div className="container text-center text-warning py-5" style={{ backgroundColor: '#111', minHeight: '100vh' }}>
+      <h2 className="mb-4">Our Painting Projects</h2>
+      <div className="row justify-content-center g-3">
         {images.map((img, index) => (
-          <div key={index} style={styles.card}>
+          <div key={index} className="col-6 col-md-4 col-lg-3">
             <img
               src={img.url}
               alt={`Project ${index}`}
-              style={styles.image}
-              onClick={() => setSelectedImage(img.url)}
+              className="img-fluid rounded shadow"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setSelectedImg(img.url)}
+              data-bs-toggle="modal"
+              data-bs-target="#imageModal"
             />
-            {isAdmin && (
-              <button onClick={() => handleDelete(img.path)} style={styles.deleteBtn}>
-                Delete
-              </button>
-            )}
           </div>
         ))}
       </div>
 
-      {selectedImage && (
-        <div style={styles.modal} onClick={() => setSelectedImage(null)}>
-          <img src={selectedImage} alt="Enlarged" style={styles.modalImage} />
+      {/* Modal */}
+      <div className="modal fade" id="imageModal" tabIndex="-1" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered modal-lg">
+          <div className="modal-content bg-dark">
+            <div className="modal-body">
+              {selectedImg && <img src={selectedImg} alt="Zoomed" className="img-fluid rounded" />}
+            </div>
+            <div className="modal-footer border-0">
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: 30,
-    backgroundColor: '#111',
-    color: '#b59410',
-    minHeight: '100vh',
-  },
-  grid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 20,
-    justifyContent: 'center',
-  },
-  card: {
-    border: '1px solid #b59410',
-    borderRadius: 8,
-    padding: 10,
-    width: 250,
-    textAlign: 'center',
-    backgroundColor: '#222',
-    cursor: 'pointer',
-  },
-  image: {
-    width: '100%',
-    borderRadius: 6,
-    marginBottom: 10,
-  },
-  deleteBtn: {
-    backgroundColor: '#b59410',
-    border: 'none',
-    padding: '6px 12px',
-    color: '#111',
-    fontWeight: 'bold',
-    borderRadius: 4,
-    cursor: 'pointer',
-  },
-  modal: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modalImage: {
-    maxWidth: '90%',
-    maxHeight: '90%',
-    borderRadius: 10,
-  },
 };
 
 export default Gallery;

@@ -28,7 +28,6 @@ const EstimateForm = () => {
         navigate('/signup');
       }
     });
-
     return () => unsubscribe();
   }, [navigate]);
 
@@ -56,7 +55,6 @@ const EstimateForm = () => {
       const squareFeet = parseFloat(form.squareFeet);
       const height = parseFloat(form.height);
       const totalPrice = (squareFeet * (height || 1)) * 1.5;
-
 
       await setDoc(doc(db, 'estimates', estimateId), {
         userId: uid,
@@ -117,11 +115,12 @@ const EstimateForm = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h2>Submit a Painting Quote Request</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
+    <div style={styles.container} className="container">
+      <h2 className="text-center mb-4">Submit a Painting Quote Request</h2>
+      <form onSubmit={handleSubmit} style={styles.form} className="w-100">
+
         <input type="text" name="name" placeholder="Full Name" value={form.name} onChange={handleChange} required />
-        <input type="text" name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} required />
+        <input type="tel" name="phone" placeholder="Phone Number" pattern="[0-9]{10,15}" title="Enter a valid phone number" value={form.phone} onChange={handleChange} required />
         <input type="text" name="address" placeholder="Address" value={form.address} onChange={handleChange} required />
         <input type="text" name="city" placeholder="City" value={form.city} onChange={handleChange} required />
         <input type="text" name="state" placeholder="State" value={form.state} onChange={handleChange} required />
@@ -144,8 +143,9 @@ const EstimateForm = () => {
         </label>
 
         <textarea name="notes" placeholder="Additional Notes (e.g., interior, fence, etc.)" value={form.notes} onChange={handleChange} />
-        <p><strong>Total Price:</strong> ${form.squareFeet && form.height ? form.squareFeet * form.height * 2 : 0}</p>
-        <button type="submit">Submit Estimate</button>
+
+        <p><strong>Total Price:</strong> ${form.squareFeet && form.height ? (form.squareFeet * form.height * 1.5).toFixed(2) : 0}</p>
+        <button type="submit" className="btn btn-warning">Submit Estimate</button>
       </form>
       {message && <p style={styles.message}>{message}</p>}
     </div>
@@ -166,7 +166,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: 10,
-    width: 320
+    maxWidth: 400
   },
   message: {
     marginTop: 10,
