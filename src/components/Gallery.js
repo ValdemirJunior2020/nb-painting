@@ -1,70 +1,54 @@
 // src/components/Gallery.js
-import React, { useEffect, useState } from 'react';
-import { auth, storage } from '../firebase/firebaseConfig';
-import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
-import Modal from 'react-modal';
+import React, { useEffect, useState, useCallback } from 'react';
+import { getStorage, ref, listAll, getDownloadURL, deleteObject } from 'firebase/storage';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
-  const [user, setUser] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  const storage = getStorage();
+
+  const fetchImages = useCallback(async () => {
+    try {
+      const folderRef = ref(storage, 'gallery');
+      const result = await listAll(folderRef);
+      const urls = await Promise.all(
+        result.items.map(async (itemRef) => {
+          const url = await getDownloadURL(itemRef);
+          return { name: itemRef.name, url, path: itemRef.fullPath };
+        })
+      );
+      setImages(urls);
+    } catch (err) {
+      console.error('Error fetching images:', err);
+    }
+  }, [storage]);
+
+  const handleDelete = async (path) => {
+    try {
+      const imageRef = ref(storage, path);
+      await deleteObject(imageRef);
+      alert('Image deleted');
+      fetchImages(); // Refresh the list
+    } catch (err) {
+      console.error('Error deleting image:', err);
+      alert('Failed to delete image');
+    }
+  };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(setUser);
-    fetchGalleryImages();
-    return () => unsubscribe();
-  }, []);
-
-  const fetchGalleryImages = async () => {
-    const galleryRef = ref(storage, 'gallery/');
-    const files = await listAll(galleryRef);
-    const urls = await Promise.all(
-      files.items.map(item => getDownloadURL(item))
-    );
-    setImages(urls);
-  };
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploading(true);
-    const fileRef = ref(storage, `gallery/${Date.now()}-${file.name}`);
-    await uploadBytes(fileRef, file);
-    await fetchGalleryImages();
-    setUploading(false);
-  };
+    fetchImages();
+  }, [fetchImages]);
 
   return (
     <div style={styles.container}>
       <h2>Our Painting Projects</h2>
-
-      {user?.email === 'jesus1@controla.com' && (
-        <div style={styles.uploadBox}>
-          <label style={styles.label}>Upload new image:</label>
-          <input type="file" accept="image/*" onChange={handleImageUpload} />
-          {uploading && <p>Uploading...</p>}
-        </div>
-      )}
-
       <div style={styles.grid}>
-        {images.map((url, index) => (
-          <div key={index} style={styles.card} onClick={() => setSelectedImage(url)}>
-            <img src={url} alt={`Project ${index + 1}`} style={styles.image} />
+        {images.map((img, index) => (
+          <div key={index} style={styles.card}>
+            <img src={img.url} alt={`Project ${index}`} style={styles.image} />
+            <button onClick={() => handleDelete(img.path)} style={styles.deleteBtn}>Delete</button>
           </div>
         ))}
       </div>
-
-      <Modal
-        isOpen={!!selectedImage}
-        onRequestClose={() => setSelectedImage(null)}
-        contentLabel="Image Modal"
-        style={modalStyles}
-        ariaHideApp={false}
-      >
-        <img src={selectedImage} alt="Zoomed In" style={{ width: '100%', borderRadius: 10 }} />
-      </Modal>
     </div>
   );
 };
@@ -74,24 +58,13 @@ const styles = {
     padding: 30,
     backgroundColor: '#111',
     color: '#b59410',
-    minHeight: '100vh'
-  },
-  uploadBox: {
-    marginBottom: 20,
-    border: '1px solid #b59410',
-    padding: 10,
-    borderRadius: 6,
-    backgroundColor: '#222'
-  },
-  label: {
-    marginRight: 10,
-    fontWeight: 'bold'
+    minHeight: '100vh',
   },
   grid: {
     display: 'flex',
-    gap: 20,
     flexWrap: 'wrap',
-    justifyContent: 'center'
+    gap: 20,
+    justifyContent: 'center',
   },
   card: {
     border: '1px solid #b59410',
@@ -99,28 +72,22 @@ const styles = {
     padding: 10,
     width: 250,
     textAlign: 'center',
-    cursor: 'pointer'
+    backgroundColor: '#222',
   },
   image: {
     width: '100%',
     borderRadius: 6,
-    transition: 'transform 0.2s',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
-  }
-};
-
-const modalStyles = {
-  content: {
-    backgroundColor: '#000',
-    padding: '20px',
-    borderRadius: '10px',
-    maxWidth: '90%',
-    maxHeight: '90%',
-    margin: 'auto'
+    marginBottom: 10,
   },
-  overlay: {
-    backgroundColor: 'rgba(0,0,0,0.8)'
-  }
+  deleteBtn: {
+    backgroundColor: '#b59410',
+    border: 'none',
+    padding: '6px 12px',
+    color: '#111',
+    fontWeight: 'bold',
+    borderRadius: 4,
+    cursor: 'pointer',
+  },
 };
 
 export default Gallery;
