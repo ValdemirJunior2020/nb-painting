@@ -1,50 +1,70 @@
-import React, { useState } from 'react';
-import Lightbox from 'react-image-lightbox';
-import 'react-image-lightbox/style.css';
-
-const images = [
-  { id: 1, url: '/houses/house-1.jpg', title: 'Luxury Exterior' },
-  { id: 2, url: '/houses/house-2.jpg', title: 'Beautiful Finish' },
-  { id: 3, url: '/houses/house-3.jpg', title: 'Modern House Paint' },
-  { id: 4, url: '/houses/house-4.jpg', title: 'Homeless Community' }
-];
+// src/components/Gallery.js
+import React, { useEffect, useState } from 'react';
+import { auth, storage } from '../firebase/firebaseConfig';
+import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
+import Modal from 'react-modal';
 
 const Gallery = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [photoIndex, setPhotoIndex] = useState(0);
+  const [images, setImages] = useState([]);
+  const [user, setUser] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleImageClick = (index) => {
-    setPhotoIndex(index);
-    setIsOpen(true);
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(setUser);
+    fetchGalleryImages();
+    return () => unsubscribe();
+  }, []);
+
+  const fetchGalleryImages = async () => {
+    const galleryRef = ref(storage, 'gallery/');
+    const files = await listAll(galleryRef);
+    const urls = await Promise.all(
+      files.items.map(item => getDownloadURL(item))
+    );
+    setImages(urls);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const fileRef = ref(storage, `gallery/${Date.now()}-${file.name}`);
+    await uploadBytes(fileRef, file);
+    await fetchGalleryImages();
+    setUploading(false);
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.heading}>Our Painting Projects</h2>
+      <h2>Our Painting Projects</h2>
+
+      {user?.email === 'jesus1@controla.com' && (
+        <div style={styles.uploadBox}>
+          <label style={styles.label}>Upload new image:</label>
+          <input type="file" accept="image/*" onChange={handleImageUpload} />
+          {uploading && <p>Uploading...</p>}
+        </div>
+      )}
+
       <div style={styles.grid}>
-        {images.map((img, index) => (
-          <div key={img.id} style={styles.card} onClick={() => handleImageClick(index)}>
-            <img src={img.url} alt={img.title} style={styles.image} />
-            <p style={styles.caption}>{img.title}</p>
+        {images.map((url, index) => (
+          <div key={index} style={styles.card} onClick={() => setSelectedImage(url)}>
+            <img src={url} alt={`Project ${index + 1}`} style={styles.image} />
           </div>
         ))}
       </div>
 
-      {isOpen && (
-        <Lightbox
-          mainSrc={images[photoIndex].url}
-          nextSrc={images[(photoIndex + 1) % images.length].url}
-          prevSrc={images[(photoIndex + images.length - 1) % images.length].url}
-          onCloseRequest={() => setIsOpen(false)}
-          onMovePrevRequest={() =>
-            setPhotoIndex((photoIndex + images.length - 1) % images.length)
-          }
-          onMoveNextRequest={() =>
-            setPhotoIndex((photoIndex + 1) % images.length)
-          }
-          imageCaption={images[photoIndex].title}
-        />
-      )}
+      <Modal
+        isOpen={!!selectedImage}
+        onRequestClose={() => setSelectedImage(null)}
+        contentLabel="Image Modal"
+        style={modalStyles}
+        ariaHideApp={false}
+      >
+        <img src={selectedImage} alt="Zoomed In" style={{ width: '100%', borderRadius: 10 }} />
+      </Modal>
     </div>
   );
 };
@@ -56,9 +76,16 @@ const styles = {
     color: '#b59410',
     minHeight: '100vh'
   },
-  heading: {
-    textAlign: 'center',
-    marginBottom: 20
+  uploadBox: {
+    marginBottom: 20,
+    border: '1px solid #b59410',
+    padding: 10,
+    borderRadius: 6,
+    backgroundColor: '#222'
+  },
+  label: {
+    marginRight: 10,
+    fontWeight: 'bold'
   },
   grid: {
     display: 'flex',
@@ -72,18 +99,27 @@ const styles = {
     padding: 10,
     width: 250,
     textAlign: 'center',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
-    transition: 'transform 0.3s ease',
     cursor: 'pointer'
   },
   image: {
     width: '100%',
-    borderRadius: 10,
-    marginBottom: 10,
-    transition: 'transform 0.3s ease'
+    borderRadius: 6,
+    transition: 'transform 0.2s',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
+  }
+};
+
+const modalStyles = {
+  content: {
+    backgroundColor: '#000',
+    padding: '20px',
+    borderRadius: '10px',
+    maxWidth: '90%',
+    maxHeight: '90%',
+    margin: 'auto'
   },
-  caption: {
-    fontWeight: 'bold'
+  overlay: {
+    backgroundColor: 'rgba(0,0,0,0.8)'
   }
 };
 

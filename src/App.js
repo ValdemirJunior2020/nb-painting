@@ -9,6 +9,7 @@ import AdminDashboard from './components/AdminDashboard';
 import Gallery from './components/Gallery';
 import Reviews from './components/Reviews';
 import LandingPage from './components/LandingPage';
+import GalleryUpload from './components/GalleryUpload'; // NEW
 import AboutUs from './components/AboutUs'; // ✅ Make sure this file exists
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
     <Router>
       <Navbar />
       <Routes>
+        <Route path="/upload-gallery" element={<GalleryUpload />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />

@@ -1,3 +1,4 @@
+// src/components/About.js
 import React from 'react';
 
 const About = () => {
@@ -8,29 +9,30 @@ const About = () => {
       <div style={styles.content}>
         <div style={styles.text}>
           <p>
-            With over <strong>15 years of experience</strong> in painting residential homes and commercial buildings, we bring passion and excellence to every project.
+            With over <strong>15 years of experience</strong> in painting residential homes and commercial buildings, we bring passion, craftsmanship, and attention to detail to every project.
           </p>
           <p>
-            <strong>Junior and Renato</strong> have worked side-by-side for more than a decade, building a reputation based on trust, quality, and reliability.
+            <strong>Junior and Renato</strong> have worked side-by-side for more than a decade, building a reputation rooted in professionalism, trust, and quality workmanship.
           </p>
           <p>
-            Through life's challenges — including Renato's <strong>8 surgeries</strong> and Junior's <strong>massive stroke</strong> — they never gave up. Instead, they returned with even more heart and determination.
+            Our team is dedicated to delivering not only beautiful results, but also an outstanding customer experience from start to finish.
           </p>
           <p>
-            Their mission now is stronger than ever: to deliver the <strong>best customer service</strong> and <strong>exceptional painting quality</strong> with a heart full of joy and gratitude.
+            We take pride in transforming spaces and exceeding client expectations, every time.
           </p>
         </div>
 
-        <div style={styles.imageBox}>
-  <img src="/junior.png" alt="Junior" style={styles.image} />
-  <p style={styles.caption}>Junior – Co-Founder</p>
-</div>
+        <div style={styles.imageRow}>
+          <div style={styles.imageBox}>
+            <img src="/junior.png" alt="Junior" style={styles.image} />
+            <p style={styles.caption}>Junior – Co-Founder</p>
+          </div>
 
-<div style={styles.imageBox}>
-  <img src="/renato.jpg" alt="Renato" style={styles.image} />
-  <p style={styles.caption}>Renato – Co-Founder</p>
-</div>
-
+          <div style={styles.imageBox}>
+            <img src="/renato.jpg" alt="Renato" style={styles.image} />
+            <p style={styles.caption}>Renato – Co-Founder</p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -42,40 +44,49 @@ const styles = {
     backgroundColor: '#111',
     color: '#b59410',
     minHeight: '100vh',
-    fontSize: '18px',
-    boxShadow: '0 0 15px rgba(0, 0, 0, 0.5)'
+    border: '1px solid #b59410',
+    boxShadow: '0 0 12px #b59410',
+    borderRadius: 10,
   },
   heading: {
-    fontSize: '32px',
+    fontSize: '2.2em',
     fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 30,
-    textAlign: 'center'
   },
   content: {
     display: 'flex',
-    flexWrap: 'wrap',
-    gap: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start'
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 30,
   },
   text: {
-    maxWidth: 500,
-    lineHeight: '1.8'
+    maxWidth: 700,
+    fontSize: '1.1em',
+    lineHeight: 1.6,
+  },
+  imageRow: {
+    display: 'flex',
+    gap: 30,
+    justifyContent: 'center',
+    flexWrap: 'wrap',
   },
   imageBox: {
-    textAlign: 'center'
+    textAlign: 'center',
   },
   image: {
-    width: 280,
+    width: 180,
+    height: 180,
+    objectFit: 'cover',
     borderRadius: '50%',
-    boxShadow: '0 0 10px rgba(255, 215, 0, 0.4)',
-    border: '2px solid #b59410'
+    border: '3px solid #b59410',
+    boxShadow: '0 0 8px #b59410',
   },
   caption: {
     marginTop: 10,
-    fontStyle: 'italic',
-    fontWeight: 'bold'
-  }
+    fontWeight: 'bold',
+    fontSize: '1em',
+  },
 };
 
 export default About;
