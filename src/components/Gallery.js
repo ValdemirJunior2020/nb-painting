@@ -5,20 +5,11 @@ import { auth } from '../firebase/firebaseConfig';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
-  const [enlargedImage, setEnlargedImage] = useState(null);
-  const [userEmail, setUserEmail] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const storage = getStorage();
 
-  // Track current user
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) setUserEmail(user.email);
-      else setUserEmail(null);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch images
+  // Define fetchImages with useCallback to avoid eslint warning
   const fetchImages = useCallback(async () => {
     try {
       const folderRef = ref(storage, 'gallery');
@@ -35,13 +26,12 @@ const Gallery = () => {
     }
   }, [storage]);
 
-  // Delete image
   const handleDelete = async (path) => {
     try {
       const imageRef = ref(storage, path);
       await deleteObject(imageRef);
       alert('Image deleted');
-      fetchImages(); // Refresh the list
+      fetchImages();
     } catch (err) {
       console.error('Error deleting image:', err);
       alert('Failed to delete image');
@@ -50,6 +40,16 @@ const Gallery = () => {
 
   useEffect(() => {
     fetchImages();
+
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user?.email === 'jesus1@controla.com') {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => unsubscribe();
   }, [fetchImages]);
 
   return (
@@ -62,18 +62,20 @@ const Gallery = () => {
               src={img.url}
               alt={`Project ${index}`}
               style={styles.image}
-              onClick={() => setEnlargedImage(img.url)}
+              onClick={() => setSelectedImage(img.url)}
             />
-            {userEmail === 'jesus1@controla.com' && (
-              <button onClick={() => handleDelete(img.path)} style={styles.deleteBtn}>Delete</button>
+            {isAdmin && (
+              <button onClick={() => handleDelete(img.path)} style={styles.deleteBtn}>
+                Delete
+              </button>
             )}
           </div>
         ))}
       </div>
 
-      {enlargedImage && (
-        <div style={styles.modalOverlay} onClick={() => setEnlargedImage(null)}>
-          <img src={enlargedImage} alt="Enlarged" style={styles.enlargedImage} />
+      {selectedImage && (
+        <div style={styles.modal} onClick={() => setSelectedImage(null)}>
+          <img src={selectedImage} alt="Enlarged" style={styles.modalImage} />
         </div>
       )}
     </div>
@@ -100,13 +102,12 @@ const styles = {
     width: 250,
     textAlign: 'center',
     backgroundColor: '#222',
-    position: 'relative',
+    cursor: 'pointer',
   },
   image: {
     width: '100%',
     borderRadius: 6,
     marginBottom: 10,
-    cursor: 'pointer',
   },
   deleteBtn: {
     backgroundColor: '#b59410',
@@ -117,16 +118,19 @@ const styles = {
     borderRadius: 4,
     cursor: 'pointer',
   },
-  modalOverlay: {
+  modal: {
     position: 'fixed',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0,0,0,0.9)',
     display: 'flex',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 1000,
   },
-  enlargedImage: {
+  modalImage: {
     maxWidth: '90%',
     maxHeight: '90%',
     borderRadius: 10,
