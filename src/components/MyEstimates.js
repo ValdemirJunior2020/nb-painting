@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db, auth } from '../firebase/firebaseConfig';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { generateEstimatePDF } from '../utils/generateEstimatePDF';
 
 const MyEstimates = () => {
   const [estimates, setEstimates] = useState([]);
@@ -65,11 +66,17 @@ const MyEstimates = () => {
                 ...styles.badge,
                 backgroundColor:
                   est.status === 'Approved' ? 'green' :
-                  est.status === 'Rejected' ? 'red' : 'gray'
+                    est.status === 'Rejected' ? 'red' : 'gray'
               }}>
                 {est.status || 'Pending'}
               </span>
             </p>
+            <button
+              onClick={() => generateEstimatePDF(est)}
+              style={styles.downloadBtn}
+            >
+              Download PDF
+            </button>
           </div>
         ))
       )}
@@ -101,6 +108,16 @@ const styles = {
     color: 'white',
     borderRadius: '5px',
     fontWeight: 'bold'
+  },
+  downloadBtn: {
+    marginTop: 10,
+    backgroundColor: '#ffd700',
+    border: 'none',
+    padding: '8px 16px',
+    borderRadius: 4,
+    color: '#111',
+    fontWeight: 'bold',
+    cursor: 'pointer'
   }
 };
 
