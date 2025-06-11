@@ -8,7 +8,7 @@ const ContactUs = () => {
       <p style={styles.text}>We would love to hear from you!</p>
       <p style={styles.text}>Phone 1: (754) 235-2250</p>
       <p style={styles.text}>Phone 2: (754) 366-9922</p>
-      <p style={styles.text}>Email: <a href="mailto:HELPNBPAINTING@GMAIL.COM" style={styles.email}>helpnbpainting@GMAIL.COM</a></p>
+      <p style={styles.text}>Email: <a href="mailto:HELPNBPAINTING@GMAIL.COM" style={styles.email}>helpnbpainting@gmail.com</a></p>
       <p style={styles.text}>Serving all of South Florida</p>
     </div>
   );
