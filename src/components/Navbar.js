@@ -23,6 +23,7 @@ const Navbar = () => {
       <Link to="/signup" style={styles.link}>Sign Up</Link>
       <Link to="/login" style={styles.link}>Login</Link>
       <Link to="/estimate" style={styles.link}>Estimate</Link>
+      <Link to="/contact" style={styles.link}>Contact Us</Link>
       <Link to="/my-estimates" style={styles.link}>My Estimates</Link>
       {user?.email === 'jesus1@controla.com' && (
         <Link to="/admin" style={styles.link}>Admin</Link>

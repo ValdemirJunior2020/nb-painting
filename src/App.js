@@ -11,6 +11,7 @@ import Reviews from './components/Reviews';
 import LandingPage from './components/LandingPage';
 import GalleryUpload from './components/GalleryUpload'; // NEW
 import AboutUs from './components/AboutUs'; // ✅ Make sure this file exists
+import ContactUs from './components/ContactUs';
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
         <Route path="/upload-gallery" element={<GalleryUpload />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/contact" element={<ContactUs />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/estimate" element={<EstimateForm />} />
         <Route path="/my-estimates" element={<MyEstimates />} />
